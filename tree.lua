@@ -71,8 +71,8 @@ function analyzeInventory ()
   end
   -- Go back to home square
   turtle.turnRight()
-  turtle.goBack()
-  turtle.goBack()
+  turtle.back()
+  turtle.back()
 end
 
 -- Finds the first slot that contains at least one sapling
@@ -106,9 +106,9 @@ end
 
 -- Only call this right after analyzeInventory.
 function refuel ()
-  while turtle.getFuelLevel() < 1000
+  while turtle.getFuelLevel() < 1000 do
     for i = 2, 16 do
-      if slotContents[i] == "wood" and turtle.getItemCount(i) > 0
+      if slotContents[i] == "wood" and turtle.getItemCount(i) > 0 then
         turtle.select(i)
         turtle.refuel(1000 - turtle.getFuelLevel())
         break
@@ -119,5 +119,5 @@ end
 
 analyzeInventory()
 for i = 3, 16 do
-  print(slotContents[i])
+  print(i .. ": " .. slotContents[i])
 end
