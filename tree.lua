@@ -28,28 +28,6 @@ function decideWhatToDo ()
   local x, y, z = relativePosition()
 end
 
--- traverse a square area, chopping down any trees found
-function traverse (x,y)
-  local dir = 0
-  turtle.turnRight()
-  local rowIndex = 1
-  for rowIndex = 1, y - 1 do
-    for colIndex = 1, x - 1 do
-      forwardHarvest()
-    end
-    if dir == 0 then
-      turtle.turnLeft()
-      forwardHarvest()
-      turtle.turnLeft()
-    else
-      turtle.turnRight()
-      forwardHarvest()
-      turtle.turnRight()
-    end
-    dir = 1 - dir
-  end
-end
-
 -- move forward, if necessary harvest tree
 function forwardHarvest()
   if turtle.detect() then
