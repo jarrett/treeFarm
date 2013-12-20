@@ -117,4 +117,7 @@ function refuel ()
   end
 end
 
-traverse(8, 8)
+analyzeInventory()
+for i = 3, 16 do
+  print(slotContents[i])
+end
