@@ -1,5 +1,33 @@
 slotContents = {}
 
+-- 0: south, 1: west, 2: north, 3: east
+-- Our script assumes that the home square is in the northeast corner.
+function getFacing ()
+  local compass = peripheral.wrap("right")
+  return compass.getFacing()
+end
+
+-- dir uses same integers as getFacing
+function face (dir)
+  while dir != getFacing() do
+    turtle.turnRight()
+  end
+end
+
+function relativePosition ()
+  local x, y, z = gps.locate(5)
+  -- These equations reflect the location of the turtle when it's at the home square.
+  -- If you move the farm, you must adjust these equations.
+  x = -242 - x
+  y = y - 965
+  z = z - 67
+  return x, y, z
+end
+
+function decideWhatToDo ()
+  local x, y, z = relativePosition()
+end
+
 -- traverse a square area, chopping down any trees found
 function traverse (x,y)
   local dir = 0
@@ -44,6 +72,7 @@ function forwardHarvest()
 end
 
 -- This function assumes we are facing the home square, i.e. the quarried stone.
+-- We end up in the exact same position and heading.
 function analyzeInventory ()
   -- Default all to rubber
   for i = 2, 16 do
@@ -73,6 +102,7 @@ function analyzeInventory ()
   turtle.turnRight()
   turtle.back()
   turtle.back()
+  turtle.turnLeft()
 end
 
 -- Finds the first slot that contains at least one sapling
@@ -115,4 +145,10 @@ function refuel ()
       end
     end
   end
+end
+
+-- This function assumes we are facing the home square, and analyzeInventory was just called
+function dropOff ()
+  turtle.turnLeft()
+  
 end
