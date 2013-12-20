@@ -45,14 +45,14 @@ end
 
 -- This function assumes we are facing the home square, i.e. the quarried stone.
 function analyzeInventory ()
-  turtle.turnRight()
-  turtle.forward()
-  turtle.turnLeft()
   -- Default all to rubber
   for i = 2, 16 do
     slotContents[i] = "rubber"
   end
   -- Mark all wood
+  turtle.turnRight()
+  turtle.forward()
+  turtle.turnLeft()
   for i = 2, 16 do
     turtle.select(i)
     if turtle.compare() then
@@ -115,9 +115,4 @@ function refuel ()
       end
     end
   end
-end
-
-analyzeInventory()
-for i = 3, 16 do
-  print(i .. ": " .. slotContents[i])
 end
