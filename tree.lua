@@ -206,8 +206,4 @@ function refuel ()
   end
 end
 
--- This function assumes we are facing the home square, and analyzeInventory was just called
-function dropOff ()
-  turtle.turnLeft()
-  
-end
+goHome()
