@@ -59,7 +59,7 @@ function face(currentDir, targetDir)
   local diff = targetDir - currentDir
   if diff == 0 then
     return
-  else if diff > 0 then
+  elseif diff > 0 then
     for i = 1, diff do
       turtle.turnRight()
     end
@@ -82,9 +82,9 @@ function facing ()
   local x2, y, z2 = relativePosition()
   if z2 > z1 then
     return 0
-  else if z2 < z1 then
+  elseif z2 < z1 then
     return 2
-  else if x2 > x2 then
+  elseif x2 > x2 then
     return 3
   else
     return 1
