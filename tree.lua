@@ -23,7 +23,7 @@ function goHome ()
   end
   local curDir = facing()
   local x, y, z = relativePosition()
-  if x > 0
+  if x > 0 then
     -- We need to move in the negative x direction
     face(curDir, 1)
     for i = 1, x do
@@ -36,7 +36,7 @@ function goHome ()
       turtle.forward()
     end
   end
-  if z > 0
+  if z > 0 then
     -- We need to move in the negative z direction
     face(curDir, 2)
     for i = 1, z do
@@ -59,7 +59,7 @@ function face(currentDir, targetDir)
   local diff = targetDir - currentDir
   if diff == 0 then
     return
-  else if diff > 0
+  else if diff > 0 then
     for i = 1, diff do
       turtle.turnRight()
     end
@@ -84,7 +84,7 @@ function facing ()
     return 0
   else if z2 < z1 then
     return 2
-  else if x2 > x2
+  else if x2 > x2 then
     return 3
   else
     return 1
