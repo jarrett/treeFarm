@@ -97,10 +97,10 @@ function getHeight ()
 end
 
 function relativePosition ()
-  local x, y, z = gps.locate(5)
+  local x, z, y = gps.locate(5)
   -- These equations reflect the location of the turtle when it's at the home square.
   -- If you move the farm, you must adjust these equations.
-  x = -242 - x
+  x = -241 - x
   y = y - 67
   z = z - 965
   return x, y, z
