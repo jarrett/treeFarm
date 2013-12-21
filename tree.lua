@@ -206,7 +206,4 @@ function refuel ()
   end
 end
 
-x, y, z = relativePosition()
-print(x)
-print(y)
-print(z)
+goHome()
