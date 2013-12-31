@@ -14,16 +14,18 @@ function main ()
       turtle.turnLeft()
       analyzeInventory()
       -- The turtle is now at 0, 1, 0 and facing negative z (relative coordinate system)
-      refuel()
-      -- The turtle is still at 0, 1, 0 and facing negative z (rel
       digMoveUp()
       dropOff()
+      digMoveUp()
+      refuel()
+      digMoveDown()
       digMoveDown()
       digMoveDown()
       -- The turtle is at 0, 0, 0 and facing negative z (rel
       turtle.turnLeft()
       traverse(8, 8)
       goHome()
+      os.sleep(20)
     else
       -- We're starting from somewhere other than the home square. The turtle must have
       -- crashed. We need to go home and start over.
@@ -110,7 +112,7 @@ end
 -- 3: positive x
 function facing ()
   local x1, y, z1 = relativePosition()
-  turtle.forward()
+  safeForward()
   local x2, y, z2 = relativePosition()
   if z2 > z1 then
     return 0
@@ -153,6 +155,7 @@ end
 -- Traverse a square area, chopping down any trees found. Assumes we're already facing
 -- the correct way to being moving down a row, i.e. our local x direction.
 function traverse (x, y)
+  print("Traversing")
   local dir = 0
   local rowIndex = 1
   for rowIndex = 1, y do
@@ -174,37 +177,41 @@ function traverse (x, y)
   end
 end
 
--- move forward, if necessary harvest tree
+-- Move forward, if necessary harvest tree. Place a sapling if appropriate. Suck up
+-- any items on the ground.
 function forwardHarvest()
   if turtle.detect() then
     turtle.dig()
-    turtle.forward()
+    safeForward()
     turtle.digDown()
     while turtle.detectUp() do
       turtle.digUp()
-      turtle.up()
+      while not turtle.up() do
+        -- No-op
+      end
     end
     while getY() > 0 do
       digMoveDown()
     end
   else
-    turtle.forward()
+    safeForward()
   end
+  selectSapling()
   turtle.suckDown()
   local x, y, z = relativePosition()
-  if not turtle.detectDown() and not (x == 0 and z == 0) then
+  if plantable(x, z) then
     local slot = selectSapling()
-    if slot > 0 then
-      turtle.placeDown()
-      if turtle.getItemCount(slot) == 0 then
-        slotContents[slot] = "misc"
-      end
+    turtle.placeDown()
+    if turtle.getItemCount(slot) == 0 then
+      slotContents[slot] = "misc"
     end
   end
 end
 
 -- This function assumes we are facing the reference sapling.
 function analyzeInventory ()
+  print("Analyzing inventory")
+  
   -- Default all to misc, which could mean rubber or nothing
   for i = firstSlot, 16 do
     slotContents[i] = "misc"
@@ -239,35 +246,38 @@ function selectSapling ()
   return 0
 end
 
+-- Is this square plantable? Pass in relative coords.
+function plantable (x, z)
+  return x > 0 and x < 7 and z > 0 and z < 7 and x % 2 == z % 2
+end
+
 function digMoveUp ()
   if turtle.detectUp() then
     turtle.digUp()
   end
-  turtle.up()
+  while not turtle.up() do
+    -- No-op
+  end
 end
 
 function digMoveDown ()
   if turtle.detectDown() then
     turtle.digDown()
   end
-  turtle.down()
+  while not turtle.down() do
+    -- No-op
+  end
 end
 
--- Assumes the inventory has been analyzed.
-function refuel ()
-  while turtle.getFuelLevel() < 1000 do
-    for i = firstSlot, 16 do
-      if slotContents[i] == "wood" and turtle.getItemCount(i) > 0 then
-        turtle.select(i)
-        turtle.refuel(1000 - turtle.getFuelLevel())
-        break
-      end
-    end
+function safeForward ()
+  while not turtle.forward() do
+    -- No-op
   end
 end
 
 -- Assumes the inventory has been analyzed. Also assumes we're at the chest.
 function dropOff ()
+  print("Dropping off")
   -- We need to keep one stack of saplings. Everything else can be dropped off. Once we've
   -- passed over one stack, we set this to true, and we know we can drop the rest.
   local keptSaplings = false
@@ -279,13 +289,26 @@ function dropOff ()
         turtle.drop(64)
       elseif turtle.getItemCount(i) > 24 then
         -- We haven't set keptSaplings yet, and this stack contains at least 24 saplings.
-        -- Therefore, we know we can drop off any future saplings we encounter.
+        -- Therefore, we know we can drop off some of these and any future stacks.
+        turtle.drop(turtle.getItemCount(i) - 24)
         keptSaplings = true
       end
     else
       turtle.drop(64)
     end
   end
+end
+
+function refuel()
+  print("Refueling")
+  for i = firstSlot, 16 do
+    if turtle.getItemCount(i) == 0 then
+      turtle.select(i)
+      break
+    end
+  end
+  turtle.suck()
+  turtle.refuel()
 end
 
 main()
