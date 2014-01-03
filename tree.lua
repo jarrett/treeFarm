@@ -275,12 +275,9 @@ function digMoveDown ()
 end
 
 function safeForward ()
-  for i = 1, 5 do
-    if turtle.forward() then
-      break
-    end
+  while not turtle.forward() do
+      -- Noop
   end
-  error("Tried to move forward but failed")
 end
 
 -- Assumes the inventory has been analyzed. Also assumes we're at the chest.
