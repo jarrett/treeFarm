@@ -35,18 +35,23 @@ function main ()
 end
 
 function goHome ()
+  print("Going home")
   local x, y, z = relativePosition()
+
+  print("At " .. x .. ", " .. y .. ", " .. z)
   if x == 0 and y == 0 and z == 0 then
     return
   end
   
   -- Get up above the treetops
+  print("Getting above treetops")
   while getY() < 9 do
     digMoveUp()
   end
   
   x, y, z = relativePosition()
 
+  print("At " .. x .. ", " .. y .. ", " .. z)
   local curDir = facing()
   if x > 0 then
     -- We need to move in the negative x direction (relative coordinate system)
@@ -270,9 +275,12 @@ function digMoveDown ()
 end
 
 function safeForward ()
-  while not turtle.forward() do
-    -- No-op
+  for i = 1, 5 do
+    if turtle.forward() then
+      break
+    end
   end
+  error("Tried to move forward but failed")
 end
 
 -- Assumes the inventory has been analyzed. Also assumes we're at the chest.
