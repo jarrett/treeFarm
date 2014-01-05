@@ -1,4 +1,4 @@
-firstSlot = 2 -- The first slot that can hold variable contents 
+firstSlot = 3 -- The first slot that can hold variable contents 
 slotContents = {}
 
 function main ()
@@ -13,7 +13,7 @@ function main ()
       end
       turtle.turnLeft()
       analyzeInventory()
-      -- The turtle is now at 0, 1, 0 and facing negative z (relative coordinate system)
+      -- The turtle is now at 0, 1, 0 and facing in the direction of the chests.
       digMoveUp()
       dropOff()
       digMoveUp()
@@ -21,7 +21,7 @@ function main ()
       digMoveDown()
       digMoveDown()
       digMoveDown()
-      -- The turtle is at 0, 0, 0 and facing negative z (rel
+      -- The turtle is at 0, 0, 0 and facing the direction of the chests.
       turtle.turnLeft()
       traverse(8, 8)
       goHome()
@@ -36,125 +36,32 @@ end
 
 function goHome ()
   print("Going home")
-  local x, y, z = relativePosition()
-
-  print("At " .. x .. ", " .. y .. ", " .. z)
-  if x == 0 and y == 0 and z == 0 then
-    return
-  end
   
-  -- Get up above the treetops
-  print("Getting above treetops")
-  while getY() < 9 do
+  -- Select the glass block for comparison. Move up until we hit the glass ceiling.
+  turtle.select(2)
+  while not turtle.compareUp() do
     digMoveUp()
   end
   
-  x, y, z = relativePosition()
-
-  print("At " .. x .. ", " .. y .. ", " .. z)
-  local curDir = facing()
-  if x > 0 then
-    -- We need to move in the negative x direction (relative coordinate system)
-    face(curDir, 3)
-    curDir = 3
-    while getX() ~= 0 do
+  -- Follow the wall around clockwise until we detect the marker block.
+  turtle.select(1)
+  while not turtle.compare() do
+    while not turtle.detect() do
       turtle.forward()
     end
-  else
-    -- We need to move in the positive x direction (relative coordinate system)
-    face(curDir, 1)
-    curDir = 1
-    while getX () ~= 0 do
-      turtle.forward()
+    if not turtle.compare() then
+      turtle.turnRight()
     end
-  end
-
-  if z > 0 then
-    -- We need to move in the negative z direction (relative coordinate system)
-    face(curDir, 2)
-    while getZ() ~= 0 do
-      turtle.forward()
-    end
-  else
-    -- We need to move in the positive z direction (relative coordinate system)
-    face(curDir, 0)
-    while getZ() ~= 0 do
-      turtle.forward()
-    end
-  end
+  end  
   
-  while getY() > 0 do
+  -- Select the stone block for comparison. Move down until we hit the stone floor.
+  while not turtle.compareDown() do
     digMoveDown()
   end
-  -- We can't call facing here, because we're in the corner and can't move. So instead,
-  -- we'll orient ourselves by looking for the home square marker, which is in slot 1.
-  turtle.select(1)
+  
   while not turtle.compare() do
     turtle.turnRight()
   end
-end
-
-function face(currentDir, targetDir)
-  local diff = targetDir - currentDir
-  if diff == 0 then
-    return
-  elseif diff > 0 then
-    for i = 1, diff do
-      turtle.turnRight()
-    end
-  else
-    diff = -1 * diff
-    for i = 1, diff do
-      turtle.turnLeft()
-    end
-  end
-end
-
--- Uses GPS and a single move forward to determine current facing.
--- 0: positive z
--- 1: negative x
--- 2: negative z
--- 3: positive x
-function facing ()
-  local x1, y, z1 = relativePosition()
-  safeForward()
-  local x2, y, z2 = relativePosition()
-  if z2 > z1 then
-    return 0
-  elseif z2 < z1 then
-    return 2
-  elseif x2 > x1 then
-    return 1
-  else
-    return 3
-  end
-end
-
-function getX ()
-  local x, y, z = relativePosition()
-  return x
-end
-
-function getY ()
-  local x, y, z = relativePosition()
-  return y
-end
-
-function getZ ()
-  local x, y, z = relativePosition()
-  return z
-end
-
-function relativePosition ()
-  local x, y, z = gps.locate(5)
-  -- These equations reflect the location of the turtle when it's at the home square.
-  -- If you move the farm, you must adjust these equations.
-  -- 
-  -- Notice that our x axis is opposite the global coordinate system.
-  x = -241 - x
-  y = y - 67
-  z = z - 965
-  return x, y, z
 end
 
 -- Traverse a square area, chopping down any trees found. Assumes we're already facing
@@ -189,13 +96,14 @@ function forwardHarvest()
     turtle.dig()
     safeForward()
     turtle.digDown()
-    while turtle.detectUp() do
+    local height = 0
+    turtle.select(2)
+    while turtle.detectUp() and not turtle.compareUp() do
       turtle.digUp()
-      while not turtle.up() do
-        -- No-op
-      end
+      turtle.up()
+      height = height + 1
     end
-    while getY() > 0 do
+    for i = 1, height do
       digMoveDown()
     end
   else
@@ -260,18 +168,14 @@ function digMoveUp ()
   if turtle.detectUp() then
     turtle.digUp()
   end
-  while not turtle.up() do
-    -- No-op
-  end
+  turtle.up()
 end
 
 function digMoveDown ()
   if turtle.detectDown() then
     turtle.digDown()
   end
-  while not turtle.down() do
-    -- No-op
-  end
+  turtle.down()
 end
 
 function safeForward ()
