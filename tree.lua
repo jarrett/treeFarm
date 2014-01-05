@@ -3,34 +3,28 @@ slotContents = {}
 
 function main ()
   while true do
-    local x, y, z = relativePosition()
-    if x == 0 and y == 0 and z == 0 then
-      -- We're on the home square. This is where we need to start. Now we need to make
-      -- sure we're facing the marker block.
-      turtle.select(1)
-      while not turtle.compare() do
-        turtle.turnRight()
-      end
-      turtle.turnLeft()
-      analyzeInventory()
-      -- The turtle is now at 0, 1, 0 and facing in the direction of the chests.
-      digMoveUp()
-      dropOff()
-      digMoveUp()
-      refuel()
-      digMoveDown()
-      digMoveDown()
-      digMoveDown()
-      -- The turtle is at 0, 0, 0 and facing the direction of the chests.
-      turtle.turnLeft()
-      traverse(8, 8)
-      goHome()
-      os.sleep(20)
-    else
-      -- We're starting from somewhere other than the home square. The turtle must have
-      -- crashed. We need to go home and start over.
-      goHome()
+    goHome()    
+    -- We're on the home square. This is where we need to start. Now we need to make
+    -- sure we're facing the marker block.
+    turtle.select(1)
+    while not turtle.compare() do
+      turtle.turnRight()
     end
+    turtle.turnLeft()
+    analyzeInventory()
+    -- The turtle is now at 0, 1, 0 and facing in the direction of the chests.
+    digMoveUp()
+    dropOff()
+    digMoveUp()
+    refuel()
+    digMoveDown()
+    digMoveDown()
+    digMoveDown()
+    -- The turtle is at 0, 0, 0 and facing the direction of the chests.
+    turtle.turnLeft()
+    traverse(8, 8)
+    goHome()
+    os.sleep(20)
   end
 end
 
@@ -66,15 +60,14 @@ end
 
 -- Traverse a square area, chopping down any trees found. Assumes we're already facing
 -- the correct way to being moving down a row, i.e. our local x direction.
-function traverse (x, y)
+function traverse (width, length)
   print("Traversing")
   local dir = 0
-  local rowIndex = 1
-  for rowIndex = 1, y do
-    for colIndex = 1, x - 1 do
-      forwardHarvest()
+  for z = 1, length do
+    for x = 1, width - 1 do
+      forwardHarvest(x, z)
     end
-    if rowIndex < y then
+    if z < length then
       if dir == 0 then
         turtle.turnLeft()
         forwardHarvest()
@@ -91,10 +84,10 @@ end
 
 -- Move forward, if necessary harvest tree. Place a sapling if appropriate. Suck up
 -- any items on the ground.
-function forwardHarvest()
+function forwardHarvest (x, z)
   if turtle.detect() then
     turtle.dig()
-    safeForward()
+    turtle.forward()
     turtle.digDown()
     local height = 0
     turtle.select(2)
@@ -103,17 +96,15 @@ function forwardHarvest()
       turtle.up()
       height = height + 1
     end
-    for i = 1, height do
+    for i = 1 , height do
       digMoveDown()
     end
   else
-    safeForward()
+    turtle.forward()
   end
-  selectSapling()
+  local slot = selectSapling()
   turtle.suckDown()
-  local x, y, z = relativePosition()
-  if plantable(x, z) then
-    local slot = selectSapling()
+  if not turtle.detectDown() then
     turtle.placeDown()
     if turtle.getItemCount(slot) == 0 then
       slotContents[slot] = "misc"
@@ -176,12 +167,6 @@ function digMoveDown ()
     turtle.digDown()
   end
   turtle.down()
-end
-
-function safeForward ()
-  while not turtle.forward() do
-      -- Noop
-  end
 end
 
 -- Assumes the inventory has been analyzed. Also assumes we're at the chest.
