@@ -22,9 +22,9 @@ function main ()
     digMoveDown()
     -- The turtle is at 0, 0, 0 and facing the direction of the chests.
     turtle.turnLeft()
-    traverse(8, 8)
+    traverse(14, 14)
     goHome()
-    os.sleep(20)
+    os.sleep(5)
   end
 end
 
@@ -65,7 +65,7 @@ function traverse (width, length)
   local dir = 0
   for z = 1, length do
     for x = 1, width - 1 do
-      forwardHarvest(x, z)
+      forwardHarvest()
     end
     if z < length then
       if dir == 0 then
@@ -84,7 +84,7 @@ end
 
 -- Move forward, if necessary harvest tree. Place a sapling if appropriate. Suck up
 -- any items on the ground.
-function forwardHarvest (x, z)
+function forwardHarvest ()
   if turtle.detect() then
     turtle.dig()
     turtle.forward()
@@ -148,11 +148,6 @@ function selectSapling ()
     end
   end
   return 0
-end
-
--- Is this square plantable? Pass in relative coords.
-function plantable (x, z)
-  return x > 0 and x < 7 and z > 0 and z < 7 and x % 2 == z % 2
 end
 
 function digMoveUp ()
