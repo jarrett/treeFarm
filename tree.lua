@@ -104,7 +104,7 @@ function forwardHarvest ()
   end
   local slot = selectSapling()
   turtle.suckDown()
-  if not turtle.detectDown() then
+  if slot > 0 and not turtle.detectDown() then
     turtle.placeDown()
     if turtle.getItemCount(slot) == 0 then
       slotContents[slot] = "misc"
@@ -147,6 +147,7 @@ function selectSapling ()
       return i
     end
   end
+  print("selectSapling failed")
   return 0
 end
 
