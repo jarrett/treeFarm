@@ -1,0 +1,103 @@
+function main()
+  if turtle.getFuelLevel() < 100 then
+    print("Not enough fuel")
+    os.exit()
+  end
+
+  print("Tree harvester running...")
+  
+  goToStart()
+  refuel()
+  goToStart()
+  
+  while true do
+    harvestTree()
+    goToStart()
+    dropWood()
+    refuel()
+    os.sleep(20)
+  end
+end
+
+function goToStart()
+  print "Going to start position"
+  -- Go to the top.
+  turtle.select(1)
+  while not turtle.compareUp() do
+    if turtle.detectUp() then
+      turtle.digUp()
+    end
+    turtle.up()
+  end
+  
+  -- Turn to face the front marker block.
+  turtle.select(2)
+  while not turtle.compare() do
+    turtle.turnRight()
+  end
+end
+
+-- Assumes we're at the start position.
+function refuel()
+  print "Refueling"
+  turtle.turnRight()
+  turtle.select(3)
+  if turtle.getFuelLevel() < 1000 then
+    turtle.suck(64)
+    turtle.refuel(64)
+  end
+end
+
+-- Assumes we're at the start position.
+function dropWood()
+  print "Dropping off wood"
+  turtle.turnRight()
+  turtle.turnRight()
+  turtle.select(5)
+  turtle.drop(64)
+end
+
+function harvestTree()
+  print "Attempting to harvest tree"
+  turtle.select(5)
+  local distance = 0
+  -- Stop when we've dug 8 blocks down or we see a sapling below us.
+  while distance <= 8 and not isAboveSapling() do
+    if turtle.detectDown() then
+      turtle.digDown()
+    end
+    turtle.down()
+    distance = distance + 1
+  end
+end
+
+function isAboveSapling()
+  turtle.select(4)
+  return turtle.compareDown()
+end
+
+main()
+
+--[[
+
+Turtle's inventory assignment:
+
+1: Top marker block (orange)
+2: Front marker block (green)
+3: Fuel
+4: Sapling
+5: Wood
+
+Turtle's home base (viewed from above):
+
+ G
+#TF
+ W
+
+G = green marker block
+T = turtle
+F = Fuel chest
+W = Wood chest
+# = Filler block
+
+--]]
